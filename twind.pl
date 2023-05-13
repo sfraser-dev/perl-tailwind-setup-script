@@ -3,30 +3,29 @@ use warnings;
 use strict;
 use feature qw(say);
 
-sub tailwindConfigJs {
-	my @newFile;
-	my $fileName = "tailwind.config.js";
-	open (my $fp, '<', $fileName) or die("Could not open '$fileName': $!");
-	while(my $line = <$fp>) {
+sub modify_tailwind_config_js {
+	my @new_file;
+	my $file_name = "tailwind.config.js";
+	open (my $fh, '<', $file_name) or die("Could not open '$file_name': $!");
+	while(my $line = <$fh>) {
 		if ($line =~ m/content/) {
 			say $line;
-			push(@newFile, "content: [\"./public/**/*.{html,js}\"],");
-			
+			push(@new_file, "content: [\"./public/**/*.{html,js}\"],");
 		}
 		else {
 			say $line;
-			push (@newFile, $line);
+			push (@new_file, $line);
 		}
 	}
-	close $fp;
-	system("rm $fileName"); 
-	open ($fp, '>', $fileName) or die ("Could not open file '$fileName': $!");
-	foreach my $i (@newFile) {
-		say $fp $i;
+	close $fh;
+	open ($fh, '>', $file_name) or die ("Could not open file '$file_name': $!");
+	foreach my $i (@new_file) {
+		say $fh $i;
 	}
-	close $fp;
+	close $fh;
 }
-sub boilerPlate {
+
+sub write_index_html_boiler_plate {
 	my @arr;
 	push(@arr, "<!DOCTYPE html>");
 	push(@arr, "<html lang=\"en\">");
@@ -41,60 +40,77 @@ sub boilerPlate {
     push(@arr, "    <h1 class=\"bg-red-600\">tailwind test</h1>");
 	push(@arr, "</body>");
 	push(@arr, "</html>");
-	my $fileName = "./public/index.html";
-	open (my $fp, '>', $fileName) or die("Could not open '$fileName': $!");
-	foreach my $i (@arr) {
-		say $fp $i;
+	my $file_name = "./public/index.html";
+	open (my $fh, '>', $file_name) or die("Could not open '$file_name': $!");
+	foreach my $line (@arr) {
+		say $fh $line;
 	}
-	close $fp;
+	close $fh;
 }
 
-sub styleCss {
+sub modify_style_css {
 	my @arr;
 	push(@arr, "\@tailwind base;");
 	push(@arr, "\@tailwind components;");
 	push(@arr, "\@tailwind utilities;");
-	my $fileName = "./public/css/style.css";
-	open (my $fp, '>', $fileName) or die("Could not open '$fileName': $!");
-	foreach my $i (@arr) {
-		say $fp $i;
+	my $file_name = "./public/css/style.css";
+	open (my $fh, '>', $file_name) or die("Could not open '$file_name': $!");
+	foreach my $line (@arr) {
+		say $fh $line;
 	}
-	close $fp;
+	close $fh;
 }
 
-sub packageJson {
-	my @newFile;
-	my $fileName = "package.json";
-	open (my $fp, '<', $fileName) or die("Could not open '$fileName': $!");
-	while(my $line = <$fp>) {
-		if ($line =~ m/"test":/) {
+sub modify_package_json {
+	my $file_name = "package.json";
+	my $line_old = "\"test\":";
+	my $line_new = "    \"dev\": \"npx tailwindcss -i ./public/css/style.css -o ./public/css/tailwind.css --watch\"";
+
+	change_line($file_name, $line_old, $line_new);
+}
+
+sub change_line () {
+	my $file_name = shift;
+	my $line_old = shift;
+	my $line_new = shift;
+
+	my @new_file;
+	my $re = qr/$line_old/;
+	open (my $fh, '<', $file_name) or die("Could not open '$file_name': $!");
+	while(my $line = <$fh>) {
+		if ($line =~ m/$line_old/) {
 			say $line;
-			push(@newFile, "    \"dev\": \"npx tailwindcss -i ./public/css/style.css -o ./public/css/tailwind.css --watch\"");
+			push(@new_file, $line_new);
 		}
 		else {
 			say $line;
-			push (@newFile, $line);
+			push (@new_file, $line);
 		}
 	}
-	close $fp;
-	system("rm $fileName"); 
-	open ($fp, '>', $fileName) or die ("Could not open file '$fileName': $!");
-	foreach my $i (@newFile) {
-		say $fp $i;
+	close $fh;
+	open ($fh, '>', $file_name) or die ("Could not open file '$file_name': $!");
+	foreach my $line (@new_file) {
+		say $fh $line;
 	}
-	close $fp;
+	close $fh;
 }
 
 system("mkdir ./public");
 system("touch ./public/index.html");
+# Run npm init (creates package.json).
 system("npm init -y");
+# Install Tailwind as a development dependency (creates node_modules/).
 system("npm install -D tailwindcss");
+# Initialise Tailwind (creates tailwind.config.js).
 system("npx tailwindcss init");
-tailwindConfigJs();
+modify_tailwind_config_js();
 system("mkdir ./public/css");
 system("touch ./public/css/style.css");
 system("touch ./public/css/tailwind.css");
-boilerPlate();
-styleCss();
-packageJson();
+# Populate index.html with boilerplate and a little Tailwind code.
+write_index_html_boiler_plate();
+# Populate style.css with Tailwind classes.
+modify_style_css();
+modify_package_json();
+# Build the tailwind.css style sheet.
 system("npx tailwindcss -i ./public/css/style.css -o ./public/css/tailwind.css --watch");
