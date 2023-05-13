@@ -4,37 +4,38 @@ use strict;
 use feature qw(say);
 use File::Path qw(make_path);
 
+# Give content property.
 sub modify_tailwind_config_js {
 	my $file_name = "tailwind.config.js";
-	my $line_old = "content";
+	my $line_contains = "content";
 	my $line_new = "content: [\"./public/**/*.{html,js}\"],";
 
-	change_line($file_name, $line_old, $line_new);
+	change_line($file_name, $line_contains, $line_new);
 }
 
+# Create dev script.
 sub modify_package_json {
 	my $file_name = "package.json";
-	my $line_old = "\"test\":";
+	my $line_contains = "\"test\":";
 	my $line_new = "    \"dev\": \"npx tailwindcss -i ./public/css/style.css -o ./public/css/tailwind.css --watch\"";
 
-	change_line($file_name, $line_old, $line_new);
+	change_line($file_name, $line_contains, $line_new);
 }
 
+# Change a line in "file_name" containing "line_contains" to "line_new".
 sub change_line () {
 	my $file_name = shift;
-	my $line_old = shift;
+	my $line_contains = shift;
 	my $line_new = shift;
 
 	my @new_file;
-	my $re = qr/$line_old/;
+	my $re = qr/$line_contains/;
 	open (my $fh, '<', $file_name) or die("Could not open '$file_name': $!");
 	while(my $line = <$fh>) {
-		if ($line =~ m/$line_old/) {
-			say $line;
+		if ($line =~ m/$line_contains/) {
 			push(@new_file, $line_new);
 		}
 		else {
-			say $line;
 			push (@new_file, $line);
 		}
 	}
@@ -44,8 +45,10 @@ sub change_line () {
 		say $fh $line;
 	}
 	close $fh;
+	say "...modified $file_name";
 }
 
+# Populate index.html with boilerplate code and a simple Tailwind class.
 sub write_index_html_boiler_plate {
 	my @arr;
 	push(@arr, "<!DOCTYPE html>");
@@ -68,8 +71,10 @@ sub write_index_html_boiler_plate {
 		say $fh $line;
 	}
 	close $fh;
+	say "...boilerplate added to $file_name";
 }
 
+# Adding Tailwind classes.
 sub modify_style_css {
 	my @arr;
 	push(@arr, "\@tailwind base;");
@@ -81,11 +86,17 @@ sub modify_style_css {
 		say $fh $line;
 	}
 	close $fh;
+	say "...tailwind classes added to $file_name";
 }
 
 #----- Main -----#
 make_path("./public");
+make_path("./public/css");
 qx(touch ./public/index.html);
+qx(touch ./public/css/style.css);
+qx(touch ./public/css/tailwind.css);
+write_index_html_boiler_plate();
+
 # Run npm init (creates package.json).
 qx(npm init -y);
 # Install Tailwind as a development dependency (creates node_modules/).
@@ -94,11 +105,6 @@ qx(npm install -D tailwindcss);
 qx(npx tailwindcss init);
 # Give content property in tailwind.config.js an array of files to process.
 modify_tailwind_config_js();
-make_path("./public/css");
-qx(touch ./public/css/style.css);
-qx(touch ./public/css/tailwind.css);
-# Populate index.html with boilerplate and a simple Tailwind class.
-write_index_html_boiler_plate();
 # Populate style.css with Tailwind classes.
 modify_style_css();
 # Modify package.json to run a dev script.
