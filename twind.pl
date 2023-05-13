@@ -23,10 +23,10 @@ sub modify_package_json {
 }
 
 # Change a line in "file_name" containing "line_contains" to "line_new".
-sub change_line () {
-	my $file_name = shift;
-	my $line_contains = shift;
-	my $line_new = shift;
+sub change_line {
+	my $file_name = $_[0];
+	my $line_contains = $_[1];
+	my $line_new = $_[2];
 
 	my @new_file;
 	my $re = qr/$line_contains/;
@@ -50,6 +50,8 @@ sub change_line () {
 
 # Populate index.html with boilerplate code and a simple Tailwind class.
 sub write_index_html_boiler_plate {
+	my $file_name = $_[0];
+	
 	my @arr;
 	push(@arr, "<!DOCTYPE html>");
 	push(@arr, "<html lang=\"en\">");
@@ -57,7 +59,7 @@ sub write_index_html_boiler_plate {
     push(@arr, "<meta charset=\"UTF-8\">");
     push(@arr, "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">");
     push(@arr, "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-    push(@arr, "<link rel=\"stylesheet\" href=\"./css/tailwind.css\">");
+    push(@arr, "<link rel=\"stylesheet\" href=\"./css/style.css\">");
     push(@arr, "<title>Document</title>");
 	push(@arr, "</head>");
 	push(@arr, "<body>");
@@ -65,7 +67,6 @@ sub write_index_html_boiler_plate {
 	push(@arr, "</body>");
 	push(@arr, "</html>");
 
-	my $file_name = "./public/index.html";
 	open (my $fh, '>', $file_name) or die("Could not open '$file_name': $!");
 	foreach my $line (@arr) {
 		say $fh $line;
@@ -75,12 +76,14 @@ sub write_index_html_boiler_plate {
 }
 
 # Adding Tailwind classes.
-sub modify_style_css {
+sub modify_build_css {
+	my $file_name = $_[0];
+
 	my @arr;
 	push(@arr, "\@tailwind base;");
 	push(@arr, "\@tailwind components;");
 	push(@arr, "\@tailwind utilities;");
-	my $file_name = "./public/css/style.css";
+
 	open (my $fh, '>', $file_name) or die("Could not open '$file_name': $!");
 	foreach my $line (@arr) {
 		say $fh $line;
@@ -92,10 +95,10 @@ sub modify_style_css {
 #----- Main -----#
 make_path("./public");
 make_path("./public/css");
+make_path("./build");
 qx(touch ./public/index.html);
-qx(touch ./public/css/style.css);
-qx(touch ./public/css/tailwind.css);
-write_index_html_boiler_plate();
+qx(touch ./build/tailwind.css);
+write_index_html_boiler_plate("./public/index.html");
 
 # Run npm init (creates package.json).
 qx(npm init -y);
@@ -105,9 +108,9 @@ qx(npm install -D tailwindcss);
 qx(npx tailwindcss init);
 # Give content property in tailwind.config.js an array of files to process.
 modify_tailwind_config_js();
-# Populate style.css with Tailwind classes.
-modify_style_css();
+# Populate the build CSS with Tailwind classes.
+modify_build_css("./build/tailwind.css");
 # Modify package.json to run a dev script.
 modify_package_json();
-# Build the tailwind.css style sheet.
-qx(npx tailwindcss -i ./public/css/style.css -o ./public/css/tailwind.css --watch);
+# Build the tailwind.css style sheet (run through postCSS).
+qx(npx tailwindcss -i ./build/tailwind.css -o ./public/css/style.css --watch);
