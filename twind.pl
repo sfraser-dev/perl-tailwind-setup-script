@@ -112,5 +112,5 @@ modify_tailwind_config_js();
 modify_build_css("./build/tailwind.css");
 # Modify package.json to run a dev script.
 modify_package_json();
-# Build the tailwind.css style sheet (run through postCSS).
+# Use the Tailwind specific sheet to build the vanilla style sheet.
 qx(npx tailwindcss -i ./build/tailwind.css -o ./public/css/style.css --watch);
