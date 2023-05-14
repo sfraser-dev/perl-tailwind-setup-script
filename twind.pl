@@ -92,23 +92,22 @@ sub populate_with_tailwind_directives{
 	say "...tailwind directives added to $file_name";
 }
 
-sub generate_watcher_restart_script {
+sub populate_with_npm_command {
 	my $file_name = $_[0];
 
 	open (my $fh, '>', $file_name) or die("Could not open '$file_name': $!");
 	say $fh "npm run build-css";
 	close $fh;
+    say "...npm command added to $file_name";
 }
 
 #----- Main -----#
 make_path("./css");
 make_path("./tailwind");
-qx(touch ./index.html);
-qx(touch ./tailwind/tailwind.css);
-qx(touch ./watcher-restart.pl);
 
 populate_with_boilerplate("./index.html");
 populate_with_tailwind_directives("./tailwind/tailwind.css");
+populate_with_npm_command("./watcher-restart.pl");
 
 # Run npm init (creates package.json).
 qx(npm init -y);
@@ -122,7 +121,6 @@ modify_tailwind_config_js();
 # Modify package.json to run a build-css script.
 modify_package_json();
 
-generate_watcher_restart_script("./watcher-restart.pl");
 
 # Build the tailwind.css style sheet.
 qx(npx tailwindcss -i ./tailwind/tailwind.css -o ./css/style.css --watch);
