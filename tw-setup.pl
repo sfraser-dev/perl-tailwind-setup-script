@@ -63,7 +63,7 @@ sub populate_with_boilerplate {
     push(@arr, "<title>Document</title>");
 	push(@arr, "</head>");
 	push(@arr, "<body>");
-    push(@arr, "    <h1 class=\"bg-red-600\">tailwind test</h1>");
+    push(@arr, "    <h1 class=\"bg-green-500\">tailwind test</h1>");
 	push(@arr, "</body>");
 	push(@arr, "</html>");
 
@@ -96,7 +96,10 @@ sub populate_with_npm_command {
 	my $file_name = $_[0];
 
 	open (my $fh, '>', $file_name) or die("Could not open '$file_name': $!");
-	say $fh "npm run build-css";
+    say $fh "#!/usr/bin/perl";
+    say $fh "use warnings;";
+    say $fh "use strict;\n";
+	say $fh "qx(npm run build-css);";
 	close $fh;
     say "...npm command added to $file_name";
 }
