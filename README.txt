@@ -1,10 +1,8 @@
 New Age Coder
 https://www.youtube.com/watch?v=DZvO_omwQ_0
 
-Others:
-AyyazTech https://www.youtube.com/watch?v=XtnWD0e7970
-NetNinja Part1 https://www.youtube.com/watch?v=bxmDnn7lrnk
-NetNinja Part2 https://www.youtube.com/watch?v=3ZMUgga6SsY
+NetNinja 
+https://www.youtube.com/watch?v=bxmDnn7lrnk
 
 #----- New Age Coder Notes
 (0)
