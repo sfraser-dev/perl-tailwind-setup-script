@@ -4,6 +4,34 @@ use strict;
 use feature qw(say);
 use File::Path qw(make_path);
 
+# Rewrite with proper indentation.
+sub modify_tailwind_config_js_and_fix_formatting {
+    my $file_name = "tailwind.config.js";
+    
+    my @new_file;
+	my $str = <<STR_END;
+/** \@type {import('tailwindcss').Config} */
+
+module.exports = {
+
+    content: ["./**/*.{html,js}"],
+    theme: {
+
+        extend: {},
+
+    },
+
+    plugins: [],
+
+};
+STR_END
+    
+    open (my $fh, '>', $file_name) or die ("Could not open file '$file_name': $!");
+	say $fh $str;
+	close $fh;
+    say "...modified $file_name and fixed formatting";
+}
+
 # Add content property.
 sub modify_tailwind_config_js {
 	my $file_name = "tailwind.config.js";
@@ -52,25 +80,24 @@ sub change_line {
 sub populate_with_boilerplate {
 	my $file_name = $_[0];
 	
-	my @arr;
-	push(@arr, "<!DOCTYPE html>");
-	push(@arr, "<html lang=\"en\">");
-	push(@arr, "<head>");
-    push(@arr, "<meta charset=\"UTF-8\">");
-    push(@arr, "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">");
-    push(@arr, "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-    push(@arr, "<link rel=\"stylesheet\" href=\"./css/style.css\">");
-    push(@arr, "<title>Document</title>");
-	push(@arr, "</head>");
-	push(@arr, "<body>");
-    push(@arr, "    <h1 class=\"bg-green-500\">tailwind test</h1>");
-	push(@arr, "</body>");
-	push(@arr, "</html>");
+	my $str = <<STR_END;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="./css/style.css">
+<title>Document</title>
+</head>
+<body>
+    <h1 class="bg-green-500">tailwind test</h1>
+</body>
+</html>
+STR_END
 
 	open (my $fh, '>', $file_name) or die("Could not open '$file_name': $!");
-	foreach my $line (@arr) {
-		say $fh $line;
-	}
+	say $fh $str;
 	close $fh;
 	say "...boilerplate added to $file_name";
 }
@@ -120,7 +147,7 @@ qx(npm install -D tailwindcss);
 qx(npx tailwindcss init);
 
 # Give content property in tailwind.config.js an array of files to process.
-modify_tailwind_config_js();
+modify_tailwind_config_js_and_fix_formatting();
 # Modify package.json to run a build-css script.
 modify_package_json();
 
