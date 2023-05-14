@@ -76,7 +76,7 @@ sub populate_with_boilerplate {
 }
 
 # Adding Tailwind functionality.
-sub populate_with_tailwind_layers{
+sub populate_with_tailwind_directives{
 	my $file_name = $_[0];
 
 	my @arr;
@@ -89,7 +89,7 @@ sub populate_with_tailwind_layers{
 		say $fh $line;
 	}
 	close $fh;
-	say "...tailwind layers added to $file_name";
+	say "...tailwind directives added to $file_name";
 }
 
 sub generate_watcher_restart_script {
@@ -108,7 +108,7 @@ qx(touch ./tailwind/tailwind.css);
 qx(touch ./watcher-restart.pl);
 
 populate_with_boilerplate("./index.html");
-populate_with_tailwind_layers("./tailwind/tailwind.css");
+populate_with_tailwind_directives("./tailwind/tailwind.css");
 
 # Run npm init (creates package.json).
 qx(npm init -y);
