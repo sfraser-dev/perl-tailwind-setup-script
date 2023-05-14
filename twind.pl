@@ -4,20 +4,20 @@ use strict;
 use feature qw(say);
 use File::Path qw(make_path);
 
-# Give content property.
+# Add content property.
 sub modify_tailwind_config_js {
 	my $file_name = "tailwind.config.js";
 	my $line_contains = "content";
-	my $line_new = "content: [\"./public/**/*.{html,js}\"],";
+	my $line_new = "content: [\"./**/*.{html,js}\"],";
 
 	change_line($file_name, $line_contains, $line_new);
 }
 
-# Create dev script.
+# Create build-css script.
 sub modify_package_json {
 	my $file_name = "package.json";
 	my $line_contains = "\"test\":";
-	my $line_new = "    \"dev\": \"npx tailwindcss -i ./public/css/style.css -o ./public/css/tailwind.css --watch\"";
+	my $line_new = "    \"build-css\": \"npx tailwindcss -i ./tailwind/tailwind.css -o ./css/style.css --watch\"";
 
 	change_line($file_name, $line_contains, $line_new);
 }
@@ -49,7 +49,7 @@ sub change_line {
 }
 
 # Populate index.html with boilerplate code and a simple Tailwind class.
-sub write_index_html_boiler_plate {
+sub populate_with_boilerplate {
 	my $file_name = $_[0];
 	
 	my @arr;
@@ -75,8 +75,8 @@ sub write_index_html_boiler_plate {
 	say "...boilerplate added to $file_name";
 }
 
-# Adding Tailwind classes.
-sub modify_build_css {
+# Adding Tailwind functionality.
+sub populate_with_tailwind_layers{
 	my $file_name = $_[0];
 
 	my @arr;
@@ -89,16 +89,26 @@ sub modify_build_css {
 		say $fh $line;
 	}
 	close $fh;
-	say "...tailwind classes added to $file_name";
+	say "...tailwind layers added to $file_name";
+}
+
+sub generate_watcher_restart_script {
+	my $file_name = $_[0];
+
+	open (my $fh, '>', $file_name) or die("Could not open '$file_name': $!");
+	say $fh "npm run build-css";
+	close $fh;
 }
 
 #----- Main -----#
-make_path("./public");
-make_path("./public/css");
-make_path("./build");
-qx(touch ./public/index.html);
-qx(touch ./build/tailwind.css);
-write_index_html_boiler_plate("./public/index.html");
+make_path("./css");
+make_path("./tailwind");
+qx(touch ./index.html);
+qx(touch ./tailwind/tailwind.css);
+qx(touch ./watcher-restart.pl);
+
+populate_with_boilerplate("./index.html");
+populate_with_tailwind_layers("./tailwind/tailwind.css");
 
 # Run npm init (creates package.json).
 qx(npm init -y);
@@ -106,11 +116,13 @@ qx(npm init -y);
 qx(npm install -D tailwindcss);
 # Initialise Tailwind (creates tailwind.config.js).
 qx(npx tailwindcss init);
+
 # Give content property in tailwind.config.js an array of files to process.
 modify_tailwind_config_js();
-# Populate the build CSS with Tailwind classes.
-modify_build_css("./build/tailwind.css");
-# Modify package.json to run a dev script.
+# Modify package.json to run a build-css script.
 modify_package_json();
-# Use the Tailwind specific sheet to build the vanilla style sheet.
-qx(npx tailwindcss -i ./build/tailwind.css -o ./public/css/style.css --watch);
+
+generate_watcher_restart_script("./watcher-restart.pl");
+
+# Build the tailwind.css style sheet.
+qx(npx tailwindcss -i ./tailwind/tailwind.css -o ./css/style.css --watch);
