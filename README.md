@@ -1,10 +1,14 @@
-New Age Coder
-https://www.youtube.com/watch?v=DZvO_omwQ_0
+# Setting up TailwindCSS
 
-NetNinja 
-https://www.youtube.com/watch?v=bxmDnn7lrnk
+Links:
+- New Age Coder
+  - <https://www.youtube.com/watch?v=DZvO_omwQ_0>
+- NetNinja 
+  - <https://www.youtube.com/watch?v=bxmDnn7lrnk>
 
-#----- New Age Coder Notes
+## New Age Coder Notes
+
+```bash
 (0)
 mkdir ./public
 touch ./public/index.html
@@ -51,10 +55,11 @@ from:
 "test": "echo \"Error: no test specified\" && exit 1"
 to:
 "dev": "npx tailwindcss -i ./public/css/style.css -o ./public/css/tailwind.css --watch"
+```
 
+## NetNinja Notes
 
-
-#----- NetNinja Notes
+```bash
 # Run npm init (creates package.json which keeps track of our node
 # dependencies of which TailwindCSS is one)
 qx(npm init -y);
@@ -76,3 +81,4 @@ qx(npm install -D tailwindcss);
 # PUBLIC-DIR also has our HTML and JS code.
 # PUBLIC-DIR is what will eventually be depolyed to a webhost on the internet.
 # src/style.css (3 line Tailwind directives base, components, utilities)
+```
